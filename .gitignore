@@ -1,5 +1,8 @@
 .venv/
+.env
 models/
 data/
 __pycache__/
 *.pyc
+*.pyo
+.DS_Store

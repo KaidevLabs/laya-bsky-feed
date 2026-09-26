@@ -1,0 +1,14 @@
+# Laya Sky Feed — pinned dependencies (CPU laptop, Python 3.14.7 tested)
+#
+# torch is the ONE machine-specific dependency and is installed separately:
+#   CPU (laptop):   pip install torch
+#   CUDA (RTX 5090, Blackwell sm_120): pip install torch --index-url https://download.pytorch.org/whl/cu128
+#
+# Everything below is installed by:  pip install -r requirements.txt
+transformers==5.17.0
+safetensors==0.8.0
+numpy==2.5.3
+websockets==17.1
+fastapi==0.141.1
+uvicorn[standard]==0.54.0
+huggingface-hub==1.33.0

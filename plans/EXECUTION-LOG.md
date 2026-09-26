@@ -7,7 +7,7 @@ record for the review pass.
 
 ## Run context
 
-- Everything ran on the **laptop** (Docker container `paciframe16inch`, Ryzen 9 7940HS,
+- Everything ran on the **laptop** (Docker container, Ryzen 9 7940HS,
   16 cores, CPU only). The 5090 desktop has no reachable route from this container.
 - **User decision:** steps 16–18 run as CPU stand-ins here; the real 5090 run (and step
   16's `True RTX 5090` / step 18's ≤ 50 ms gate) stays open.

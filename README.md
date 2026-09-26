@@ -1,18 +1,37 @@
 Laya Sky Feed
 
+A Bluesky feed pipeline that runs on your own hardware: the Jetstream firehose
+is consumed, pre-filtered, scored in-process by the Laya RL agent, and logged
+append-only to `data/decisions.jsonl`. A FastAPI daemon serves the live feed
+and a single-file dashboard.
+
 ## Demo
 
 ![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream-teaser.mp4)
 
-*15s teaser (160KB). Full recording: [demo-stream.mp4](demo-stream.mp4) · [demo-stream.webm](demo-stream.webm)*
+*15s teaser (160KB). Full 61s recording: [demo-stream.mp4](demo-stream.mp4) ·
+[demo-stream.webm](demo-stream.webm). Recorded from the real page against the
+real firehose: the regex is typed live, the meaning tab scores a 5/s sample
+with Laya, and the collect threshold is relaxed from 95% to 80% on camera when
+the confident drip slows. The capture choreography (CDP screencast of headless
+chromium) stays scratch; only its outputs are committed.*
 
-Recorded live: the raw Jetstream stream pours in, typing a regex splits it
-green/red on the fly, the meaning tab scores a 5/s sample with Laya on the
-default 6-way topic question (~200 ms/post on CPU), and verdicts for the
-collected option (technology) drip into the reading tray — collect threshold
-pushed to 95% first, then relaxed to 80% live when the confident drip slows.
-The capture choreography (CDP screencast of headless chromium) stays scratch;
-only the outputs are committed, like llm-arena-pareto's demo capture.
+## Setup
+
+Prereqs: **Python ≥ 3.10** (developed on 3.14), git. **No API keys** — the
+model is a public Hugging Face checkpoint and Jetstream needs no auth.
+
+    git clone https://github.com/<you>/laya-sky-feed.git
+    cd laya-sky-feed
+    python3 -m venv .venv && source .venv/bin/activate
+    pip install -r requirements.txt
+    pip install torch        # CPU; on the RTX 5090 box use the cu128 index instead (see requirements.txt)
+    hf download convaiinnovations/laya --local-dir models/laya
+
+The last step downloads the model (~2.3 GB: `model.safetensors` + encoder +
+tokenizer + the vendor `rl_agent_*.py` files) into `models/laya/`. Everything
+the pipeline writes (`data/`) and the venv are gitignored; nothing in this
+repo references personal paths, and no credentials are needed anywhere.
 
 ## Run
 
