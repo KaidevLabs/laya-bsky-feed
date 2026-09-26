@@ -59,6 +59,17 @@ Master plan: `plans/001-laya-sky-feed.md` (architecture, decisions D1–D11, env
 | 21 | `plans/steps/step-21-service-auth.md` | feed | laptop | verify AppView-signed requests; unsigned → 401 |
 | 22 | `plans/steps/step-22-golive.md` | feed | **gated** | publish feed + go live — you in the loop, account steps are yours |
 
+## Execution status (2026-09-26 orchestrator run)
+
+- **01–08 done** — venv/deps, model, skeleton+config, smoke test (vendor API discovered), scoring core, CLI, replay, Jetstream probe.
+- **09–11 done** (`e229244`) — parse+filters+counters, bounded queue+consumer, cursor resume+reconnect+no-dupes.
+- **12 ⚠** — the executor's final report was lost (its 60s run drained fine but crashed at final cursor persist: a two-writer race that step 11 has since fixed in code). Re-adjudicated directly on the final code: pipeline mechanics verified live (counters invariant, cursor==last line, no dupes, zero errors); **replay cross-check blocked by a spec gap** — decision-log lines carry no `text`, so the log alone is not replayable. Open decision, see the log.
+- **13–14 done** (`fe8b767`, `b09db1b`) — daemon SSE + runbook, single-file dashboard (browser accept performed text-only: vision unavailable).
+- **15–21 not started**; **16–18 run as CPU stand-ins** on this laptop (user decision — the 5090 desktop is not reachable yet), so step 16's `True RTX 5090` and step 18's ≤ 50 ms gate remain open.
+- **22 not started** (gated go-live, you in the loop).
+
+Full per-step deviations and open items: `plans/EXECUTION-LOG.md`.
+
 ## The three gates
 
 - **Step 12** — pipeline core acceptance. UI work does not start until every check passes.

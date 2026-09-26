@@ -1,6 +1,6 @@
 # Plan 001 — Laya Sky Feed (Bluesky feed generator, RTX 5090 target)
 
-Status: **planned, not started** — 22 atomic steps in `plans/steps/`. Steps 01–15 laptop (CPU), 16–18 desktop (5090), 19–21 laptop, 22 gated go-live.
+Status: **in execution — steps 01–11, 13–14 done (12 gate re-adjudicated: mechanics pass, replay-from-log gap open); 15–22 open; 16–18 CPU stand-ins until the 5090 box is reachable. Details: `plans/EXECUTION-LOG.md`.** 22 atomic steps in `plans/steps/`. Steps 01–15 laptop (CPU), 16–18 desktop (5090), 19–21 laptop, 22 gated go-live.
 
 ## 0. Objective
 
