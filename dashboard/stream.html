@@ -225,8 +225,8 @@
   <button class="mini" id="addOpt" title="add option">+ opt</button>
   <button class="mini" id="delOpt" title="remove last option">–</button>
   <div class="presets" id="qPresets">
-    <button data-q="ai">AI?</button>
     <button data-q="topic">topic</button>
+    <button data-q="ai">AI?</button>
     <button data-q="substance">substance (v1)</button>
     <button data-q="sentiment">sentiment</button>
     <button data-q="asktell">ask/tell</button>
@@ -271,7 +271,7 @@
           <button class="ck on" id="rPause" title="pause/resume the entry drip">⏸</button>
         </span>
       </h2>
-      <div id="readList"><div id="rHint">Click an option in the tally<br>(e.g. <b>AI</b>) to collect it here.<br><br>Matching posts enter slowly,<br>one at a time — a reading queue,<br>not another firehose.</div></div>
+      <div id="readList"><div id="rHint">Click an option in the tally<br>(e.g. <b>technology</b>) to collect it here.<br><br>Matching posts enter slowly,<br>one at a time — a reading queue,<br>not another firehose.</div></div>
     </aside>
   </div>
 </main>
@@ -322,10 +322,10 @@ const OPTION_COLORS = ["#2ee6a8","#4da3ff","#f0b429","#c792ea","#ff8f5d","#5dd6f
 
 /* ---------------- presets ---------------- */
 const QPRESETS = {
+  topic:     {q: "Which topic does this post talk about most?",
+              o: ["technology", "politics", "sports", "entertainment", "personal life", "other"]},
   ai:        {q: "Is this post about AI — llms, models, agents, machine learning — or something else?",
               o: ["AI", "not AI"]},
-  topic:     {q: "Which topic does this post talk about most?",
-              o: ["economy", "politics", "technology", "sports", "other"]},
   substance: {q: "Does this post contain something worth showing to others (information, art, humor, help), or is it noise?",
               o: ["substantive", "noise"]},
   sentiment: {q: "What is the overall sentiment of this post?",
@@ -610,7 +610,7 @@ function resetQuestionState(){
   collect.clear(); readAll.length = 0; readShown.clear(); unread = 0;
   $("readList").replaceChildren();
   const hint = document.createElement("div"); hint.id = "rHint";
-  hint.innerHTML = "Click an option in the tally<br>(e.g. <b>AI</b>) to collect it here.<br><br>Only verdicts ≥ <b>" + collectThr + "%</b> confidence<br>enter — one at a time,<br>a reading queue, not a firehose.";
+  hint.innerHTML = "Click an option in the tally<br>(e.g. <b>technology</b>) to collect it here.<br><br>Only verdicts ≥ <b>" + collectThr + "%</b> confidence<br>enter — one at a time,<br>a reading queue, not a firehose.";
   $("readList").append(hint);
   $("reader").classList.remove("open");
   backfillOn = false; backfillQueue.length = 0; backfillDone = 0; backfillTotal = 0;
