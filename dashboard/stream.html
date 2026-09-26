@@ -233,6 +233,7 @@
   </div>
   <label>sample <input type="range" id="rate" min="1" max="5" value="2"> <span id="rateV">2/s</span></label>
   <label>unsure &lt; <input type="range" id="thr" min="5" max="50" value="15"> <span id="thrV">15%</span></label>
+  <label>read ≥ <input type="range" id="collThr" min="50" max="95" step="5" value="80"> <span id="collV">80%</span></label>
   <input id="pre" spellcheck="false" autocomplete="off" placeholder="pre-filter regex (optional)">
   <span id="preErr"></span>
   <button class="mini" id="backfill" title="score the buffered last 300 posts with the current question">↺ backfill</button>
@@ -262,7 +263,7 @@
       <div class="tsub" id="tallySub"></div>
     </aside>
     <aside id="reader">
-      <h2>to read
+      <h2>to read ≥<span id="rThr">80%</span>
         <span class="n" id="rUnread">0</span>
         <span class="rbtns">
           <button class="ck" id="rMarkAll" title="mark all read">✓ all</button>
@@ -348,7 +349,7 @@ let win = {posts:0, pass:0, drop:0, other:0, cand:0, sampled:0, scored:0, err:0}
 const history = [];
 let re = null, rxError = "";
 /* meaning state */
-let qTextValue = QPRESETS.topic.q, preRe = null, sampleRate = 2, unsureThr = 15;
+let qTextValue = QPRESETS.topic.q, preRe = null, sampleRate = 2, unsureThr = 15, collectThr = 80;
 const verdictMap = new Map();         // uri -> {verdict, option, confidence, latency_ms}
 const queuedSet = new Set();          // uris sampled, awaiting verdict
 const pendingSend = [];               // posts waiting for a send slot
@@ -489,7 +490,7 @@ function applyVerdict(uri, res){
   msWindow.push(res.latency_ms); if(msWindow.length > MS_WINDOW) msWindow.shift();
   const el = cardEls.get(uri);
   if(el) dressVerdict(el, res);
-  if(collect.has(res.option)){
+  if(collect.has(res.option) && res.confidence * 100 >= collectThr){
     const post = uriToPost.get(uri);
     if(post){ readAll.push({uri, post, res}); pumpReader(); }
   }
@@ -606,7 +607,7 @@ function resetQuestionState(){
   collect.clear(); readAll.length = 0; readShown.clear(); unread = 0;
   $("readList").replaceChildren();
   const hint = document.createElement("div"); hint.id = "rHint";
-  hint.innerHTML = "Click an option in the tally<br>(e.g. <b>economy</b>) to collect it here.<br><br>Matching posts enter slowly,<br>one at a time — a reading queue,<br>not another firehose.";
+  hint.innerHTML = "Click an option in the tally<br>(e.g. <b>economy</b>) to collect it here.<br><br>Only verdicts ≥ <b>" + collectThr + "%</b> confidence<br>enter — one at a time,<br>a reading queue, not a firehose.";
   $("readList").append(hint);
   $("reader").classList.remove("open");
   backfillOn = false; backfillQueue.length = 0; backfillDone = 0; backfillTotal = 0;
@@ -637,6 +638,7 @@ document.querySelectorAll("#qPresets button").forEach(b => b.addEventListener("c
 }));
 $("rate").addEventListener("input", () => { sampleRate = +$("rate").value; $("rateV").textContent = sampleRate + "/s"; });
 $("thr").addEventListener("input", () => { unsureThr = +$("thr").value; $("thrV").textContent = unsureThr + "%"; });
+$("collThr").addEventListener("input", () => { collectThr = +$("collThr").value; $("collV").textContent = collectThr + "%"; $("rThr").textContent = collectThr + "%"; });
 let preTimer = null;
 $("pre").addEventListener("input", () => {
   clearTimeout(preTimer);
