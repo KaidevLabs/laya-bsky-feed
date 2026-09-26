@@ -1,5 +1,15 @@
 Laya Sky Feed
 
+## Demo
+
+![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream.mp4)
+
+Recorded live: the raw Jetstream stream pours in, typing a regex splits it
+green/red on the fly, the meaning tab scores a sample with Laya (~200 ms/post
+on CPU), and confident verdicts drip into the reading tray. There is also a
+lighter `demo-stream.webm` spare. Reproduce with the choreography in
+`scripts/` (see the playground sections below).
+
 ## Run
 
 Terminal A — pipeline + web server:
