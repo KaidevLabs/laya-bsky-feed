@@ -2,6 +2,8 @@ Laya Sky Feed
 
 ## Demo
 
+![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](https://github.com/user-attachments/assets/0e77137a-1b7b-43ee-b276-b63f318d3a7e)
+
 ![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream-teaser.mp4)
 
 *15s teaser (160KB). Full recording: [demo-stream.mp4](demo-stream.mp4) · [demo-stream.webm](demo-stream.webm)*
