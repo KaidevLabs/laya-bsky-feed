@@ -11,6 +11,7 @@ Terminal B — the terminal view:
 
 Browser: http://127.0.0.1:8000
 
+
 ## Raw stream playground (no model, no pipeline)
 
 A standalone page — the browser connects to Jetstream directly; the whole post
@@ -22,4 +23,21 @@ Editing the regex re-evaluates the last 1000 posts instantly. No backend needed:
     # (or just open dashboard/stream.html as a file)
 
 Keys: `/` focuses the regex, space pauses, empty regex accepts everything.
+
+## Meaning mode (Laya in the playground)
+
+Same page, second tab: switch to **meaning** and posts get scored by the model
+on an arbitrary "pick one" question you type (topic, sentiment, ask/tell, …).
+The whole stream still flows gray; a sample (default 2/s) is pre-filtered and
+sent to a tiny local scoring server that reuses the vendor agent:
+
+    source .venv/bin/activate
+    python scripts/meaning_server.py        # 127.0.0.1:8100, loads models/laya
+
+Cards start amber-pulsing (queued) and flip to their option's color the moment
+the verdict lands; the sidebar tallies options live. Unsure-verdicts (below the
+confidence slider) render dashed. `↺ backfill` scores the buffered last 300
+posts with the current question. On CPU expect ~200ms/post (raise the sample
+rate on the 5090); the regex tab keeps working with or without the backend.
+
 

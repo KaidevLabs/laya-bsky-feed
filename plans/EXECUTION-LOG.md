@@ -79,6 +79,13 @@ record for the review pass.
 5. Human browser pass on `http://127.0.0.1:8000` (the dashboard was verified text-only;
    vision was unavailable). Daemon is stopped — restart per the README runbook.
 6. Steps 06/07's reserved `build-index`/`top` stubs await step 19.
+7. Post-plan addition (user-requested, committed outside the 22-step scope):
+   `dashboard/stream.html` — standalone Jetstream playground with two modes:
+   regex (green/red split, live re-classification) and meaning (arbitrary
+   one-question verdicts via `scripts/meaning_server.py`, sample-then-score,
+   amber-queued → option-colored cards, live tally, backfill). The meaning
+   server reuses `laya_sort.laya.get_agent()` — same door, no pipeline conflict;
+   measured ~200ms/post on CPU, one forward pass per post with all options.
 
 ## Verified facts worth keeping (discovered, not assumed)
 
