@@ -834,8 +834,8 @@ function connect(){
 connect();
 
 /* init + shortcuts */
-$("qText").value = QPRESETS.ai.q;
-buildOptRows(QPRESETS.ai.o);
+$("qText").value = QPRESETS.topic.q;
+buildOptRows(QPRESETS.topic.o);
 renderTally();
 const pauseBtn = $("pausebtn");
 function togglePause(){ paused = !paused; pauseBtn.classList.toggle("on", paused);
