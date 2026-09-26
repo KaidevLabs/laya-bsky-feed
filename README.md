@@ -4,6 +4,8 @@ Laya Sky Feed
 
 ![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream.mp4)
 
+*(GitHub renders the video inline above; direct links: [demo-stream.mp4](demo-stream.mp4) · [demo-stream.webm](demo-stream.webm))*
+
 Recorded live: the raw Jetstream stream pours in, typing a regex splits it
 green/red on the fly, the meaning tab scores a 5/s sample with Laya on the
 default 6-way topic question (~200 ms/post on CPU), and verdicts for the
