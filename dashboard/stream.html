@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laya raw stream — regex playground</title>
+<style>
+  :root{
+    --bg:#0a0d13; --panel:#11151d; --line:#232a36; --text:#e8edf5; --dim:#8b95a7;
+    --pass:#2ee6a8; --drop:#ff5d73; --accent:#4da3ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:radial-gradient(1200px 600px at 70% -10%, #131a26 0%, var(--bg) 60%);
+    color:var(--text); font:14px/1.45 system-ui,-apple-system,sans-serif; overflow:hidden;
+  }
+  header{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    padding:10px 16px; border-bottom:1px solid var(--line); background:rgba(13,17,24,.85);
+    backdrop-filter:blur(6px); position:sticky; top:0; z-index:5;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.06em}
+  .dot{width:10px;height:10px;border-radius:50%;background:#888;box-shadow:0 0 8px currentColor}
+  .dot.on{background:var(--pass);color:var(--pass);animation:pulse 2s infinite}
+  .dot.wait{background:#f0b429;color:#f0b429}
+  .dot.off{background:var(--drop);color:var(--drop)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  #connlabel{font-weight:400;font-size:12px;color:var(--dim)}
+  .stats{display:flex;gap:14px}
+  .stat{min-width:74px;text-align:center;padding:4px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+  .stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums;transition:transform .12s}
+  .stat b.bump{transform:scale(1.18)}
+  .stat small{color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .stat.pass b{color:var(--pass)} .stat.drop b{color:var(--drop)}
+  #spark{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+  .filterbar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;
+    border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:4;
+  }
+  .rx{font:600 15px ui-monospace,monospace;color:var(--accent)}
+  #regex{
+    flex:1;min-width:260px;padding:9px 12px;font:600 15px ui-monospace,monospace;
+    background:#0c1017;color:var(--text);border:1px solid var(--line);border-radius:10px;outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  #regex:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,163,255,.18)}
+  #regex.bad{border-color:var(--drop);box-shadow:0 0 0 3px rgba(255,93,115,.15)}
+  .filterbar label{display:flex;gap:6px;align-items:center;color:var(--dim);font-size:12px;cursor:pointer;user-select:none}
+  #rxerr{color:var(--drop);font:12px ui-monospace,monospace;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #bufinfo{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+  .presets{display:flex;gap:6px;flex-wrap:wrap}
+  .presets button{
+    padding:3px 9px;font:12px ui-monospace,monospace;color:var(--dim);background:#0c1017;
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:all .12s;
+  }
+  .presets button:hover{color:var(--text);border-color:var(--accent)}
+  #pausebtn{
+    padding:5px 12px;font-size:12px;font-weight:600;color:var(--text);background:#0c1017;
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;
+  }
+  #pausebtn.on{background:#2a1d20;border-color:var(--drop);color:var(--drop)}
+  main{display:flex;height:calc(100vh - 108px)}
+  .col{flex:1;min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+  .col.drop{border-right:none;background:rgba(255,93,115,.025)}
+  .col.pass{background:rgba(46,230,168,.025)}
+  .col h2{
+    margin:0;padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--dim);border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;position:sticky;top:0;
+    background:rgba(13,17,24,.9);backdrop-filter:blur(4px);
+  }
+  .col.pass h2{color:var(--pass)} .col.drop h2{color:var(--drop)}
+  .col h2 .n{margin-left:auto;font-variant-numeric:tabular-nums;font-size:12px;color:var(--dim)}
+  .cards{overflow-y:auto;padding:10px 12px 40px;flex:1}
+  .card{
+    padding:8px 11px;margin-bottom:8px;border-radius:10px;background:var(--panel);
+    border:1px solid var(--line);border-left:3px solid var(--dim);
+    animation:in .18s ease-out;
+  }
+  @keyframes in{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
+  .card.p{border-left-color:var(--pass);box-shadow:0 0 12px rgba(46,230,168,.07)}
+  .card.d{border-left-color:var(--drop);opacity:.72}
+  .card.d .txt{color:var(--dim);-webkit-line-clamp:1;max-height:20px}
+  .card.flip{animation:flip .35s ease-out}
+  @keyframes flip{0%{filter:brightness(1.9)}100%{filter:none}}
+  .head{display:flex;gap:8px;align-items:baseline;margin-bottom:3px}
+  .who{font:600 11px ui-monospace,monospace;color:var(--accent);opacity:.85}
+  .card.d .who{color:var(--dim)}
+  .when{font-size:10px;color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums}
+  .txt{font-size:13px;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  mark{background:rgba(46,230,168,.28);color:inherit;border-radius:3px;padding:0 1px}
+  .card.d mark{background:rgba(255,93,115,.3)}
+  #skipped{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);color:var(--dim);font-size:11px;
+    background:rgba(13,17,24,.9);border:1px solid var(--line);padding:3px 10px;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">RAW STREAM
+    <span class="dot wait" id="conn"></span><span id="connlabel">connecting…</span>
+    <button id="pausebtn">⏸ pause <small>(space)</small></button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sIn">0</b><small>posts/s</small></div>
+    <div class="stat pass"><b id="sPass">0</b><small>pass/s</small></div>
+    <div class="stat drop"><b id="sDrop">0</b><small>discard/s</small></div>
+    <div class="stat"><b id="sRate">—</b><small>pass rate</small></div>
+    <div class="stat"><b id="sOther">0</b><small>other/s</small></div>
+  </div>
+  <canvas id="spark" width="260" height="46"></canvas>
+</header>
+
+<div class="filterbar">
+  <span class="rx">/</span>
+  <input id="regex" spellcheck="false" autocomplete="off"
+         placeholder="regex — empty accepts everything · e.g. \bcoffee\b|\bsky\b">
+  <span class="rx">/i</span>
+  <label><input type="checkbox" id="ci" checked> ignore case</label>
+  <label><input type="checkbox" id="ma"> match author too</label>
+  <span id="rxerr"></span>
+  <span id="bufinfo"></span>
+  <div class="presets">
+    <button data-rx="\bcoffee\b|\bbeer\b|\btea\b">drinks</button>
+    <button data-rx="https?://\S+">links</button>
+    <button data-rx="\?|!{2,}">question|hype</button>
+    <button data-rx="^(.{0,40})$">short</button>
+  </div>
+</div>
+
+<main>
+  <section class="col pass">
+    <h2>✓ accepted <span class="n" id="cPass">0</span></h2>
+    <div class="cards" id="colPass"></div>
+  </section>
+  <section class="col drop">
+    <h2>✗ discarded <span class="n" id="cDrop">0</span></h2>
+    <div class="cards" id="colDrop"></div>
+  </section>
+</main>
+<div id="skipped"></div>
+
+<script>
+"use strict";
+/*__LOGIC_START__ (pure functions — unit-testable)*/
+function extractPost(msg){
+  // returns {did, rkey, text, createdAt, timeUs} for create-op posts, else null
+  if(!msg || typeof msg !== "object" || msg.kind !== "commit") return null;
+  const c = msg.commit;
+  if(!c || typeof c !== "object" || c.collection !== "app.bsky.feed.post") return null;
+  if(c.operation !== "create") return null;
+  const r = (c.record && typeof c.record === "object") ? c.record : {};
+  return {did: String(msg.did || ""), rkey: String(c.rkey || ""),
+          text: typeof r.text === "string" ? r.text : "",
+          createdAt: typeof r.createdAt === "string" ? r.createdAt : "",
+          timeUs: typeof msg.time_us === "number" ? msg.time_us : 0};
+}
+function compileRegex(src, ci){
+  if(!src.trim()) return {re: null, error: ""};       // empty = accept all
+  try{ return {re: new RegExp(src, ci ? "i" : ""), error: ""}; }
+  catch(e){ return {re: null, error: String(e.message || e)}; }
+}
+function classify(post, re, matchAuthor){
+  if(!re) return true;                                 // empty regex accepts all
+  if(re.test(post.text)) return true;
+  if(matchAuthor && post.did && re.test(post.did)) return true;
+  return false;
+}
+function shortDid(did){ return did.replace(/^did:plc:/, "").slice(-6) || "?"; }
+function fmtTime(post){
+  let ms = 0;
+  if(post.createdAt){ const t = Date.parse(post.createdAt); if(!isNaN(t)) ms = t; }
+  if(!ms && post.timeUs) ms = post.timeUs / 1000;
+  return ms ? new Date(ms).toLocaleTimeString([], {hour12:false}) : "--:--:--";
+}
+/*__LOGIC_END__*/
+
+/* ---------------- state ---------------- */
+const WS_URL = "wss://jetstream2.us-west.bsky.network/subscribe?wantedCollections=app.bsky.feed.post";
+const BUFFER_MAX = 1000, COL_MAX = 150, QUEUE_MAX = 400, RENDER_PER_FRAME = 8;
+const $ = id => document.getElementById(id);
+const colPass = $("colPass"), colDrop = $("colDrop");
+const buffer = [];            // newest first: recent posts for live re-eval
+const queue = [];             // posts waiting to be rendered
+let skipped = 0, paused = false, backoff = 1000;
+let win = {posts:0, pass:0, drop:0, other:0};        // rolling 1s window
+const history = [];                                    // per-second {posts,pass}
+let re = null, rxError = "";
+
+function compile(){
+  const src = $("regex").value, ci = $("ci").checked;
+  const r = compileRegex(src, ci);
+  if(r.error){ rxError = r.error; $("rxerr").textContent = "⚠ " + r.error; $("regex").classList.add("bad"); }
+  else{ rxError = ""; re = r.re; $("rxerr").textContent = ""; $("regex").classList.remove("bad"); rebuild(); }
+  $("bufinfo").textContent = bufferInfo();
+}
+function bufferInfo(){
+  if(!buffer.length) return "";
+  const n = buffer.reduce((a,p) => a + (classify(p, re, $("ma").checked) ? 1 : 0), 0);
+  return "last " + buffer.length + ": " + n + " match (" + Math.round(100*n/buffer.length) + "%)";
+}
+let rebuildTimer = null;
+function scheduleCompile(){ clearTimeout(rebuildTimer); rebuildTimer = setTimeout(compile, 160); }
+$("regex").addEventListener("input", scheduleCompile);
+$("ci").addEventListener("change", scheduleCompile);
+$("ma").addEventListener("change", () => { rebuild(); $("bufinfo").textContent = bufferInfo(); });
+document.querySelectorAll(".presets button").forEach(b =>
+  b.addEventListener("click", () => { $("regex").value = b.dataset.rx; scheduleCompile(); }));
+
+/* ---------------- rendering ---------------- */
+function makeCard(post, pass){
+  const el = document.createElement("div");
+  el.className = "card " + (pass ? "p" : "d");
+  const head = document.createElement("div"); head.className = "head";
+  const who = document.createElement("span"); who.className = "who"; who.textContent = shortDid(post.did);
+  const when = document.createElement("span"); when.className = "when"; when.textContent = fmtTime(post);
+  head.append(who, when);
+  const txt = document.createElement("div"); txt.className = "txt";
+  txt.textContent = post.text || "(no text)";
+  el.append(head, txt);
+  return el;
+}
+function highlight(post, pass){                        // cards are textContent-only; mark = visual hint via first-match chip
+  if(!re) return null;
+  const m = (post.text.match(re) || ($("ma").checked && post.did ? post.did.match(re) : null));
+  return m ? m[0] : null;
+}
+function renderCard(post){
+  const pass = classify(post, re, $("ma").checked);
+  const col = pass ? colPass : colDrop;
+  const card = makeCard(post, pass);
+  const hit = highlight(post, pass);
+  if(hit && post.text){                                // cheap highlight: prepend the matched snippet chip
+    const mark = document.createElement("div");
+    mark.style.cssText = "font:600 10px ui-monospace,monospace;margin-top:3px;color:" +
+      (pass ? "var(--pass)" : "var(--drop)") + ";opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+    mark.textContent = "◆ " + hit.slice(0, 60);
+    card.append(mark);
+  }
+  col.prepend(card);
+  while(col.children.length > COL_MAX) col.lastElementChild.remove();
+  (pass ? $("cPass") : $("cDrop")).textContent = col.children.length;
+  return pass;
+}
+function rebuild(){                                    // regex changed → re-evaluate the buffer, flip colors with a pulse
+  colPass.replaceChildren(); colDrop.replaceChildren();
+  const posts = buffer.slice(0, COL_MAX);
+  for(const p of posts){
+    const pass = classify(p, re, $("ma").checked);
+    const col = pass ? colPass : colDrop;
+    const card = makeCard(p, pass); card.classList.add("flip");
+    col.append(card);
+  }
+  $("cPass").textContent = colPass.children.length;
+  $("cDrop").textContent = colDrop.children.length;
+  $("bufinfo").textContent = bufferInfo();
+}
+function frame(){                                      // render budget: keeps 600 msg/s from melting the DOM
+  let n = 0;
+  while(queue.length && n < RENDER_PER_FRAME){ renderCard(queue.shift()); n++; }
+  if(queue.length > QUEUE_MAX){ skipped += queue.length - QUEUE_MAX; queue.length = QUEUE_MAX;
+    const s = $("skipped"); s.style.display = "block"; s.textContent = "render-skipped: " + skipped + " (counters stay exact)"; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------------- websocket ---------------- */
+function statsTick(){
+  const sIn = $("sIn"), sPass = $("sPass"), sDrop = $("sDrop"), sOther = $("sOther"), sRate = $("sRate");
+  const bump = el => { el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); };
+  sIn.textContent = win.posts; sPass.textContent = win.pass; sDrop.textContent = win.drop; sOther.textContent = win.other;
+  sRate.textContent = (win.pass + win.drop) ? Math.round(100 * win.pass / (win.pass + win.drop)) + "%" : "—";
+  [sIn, sPass, sDrop, sOther].forEach(bump);
+  history.push({posts: win.posts, pass: win.pass});
+  if(history.length > 90) history.shift();
+  drawSpark();
+  win = {posts:0, pass:0, drop:0, other:0};
+}
+function drawSpark(){
+  const cv = $("spark"), ctx = cv.getContext("2d");
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const max = Math.max(10, ...history.map(h => h.posts));
+  const plot = (key, color) => {
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    history.forEach((h, i) => {
+      const x = i / Math.max(1, history.length - 1) * (cv.width - 6) + 3;
+      const y = cv.height - 4 - h[key] / max * (cv.height - 10);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+  };
+  plot("posts", "#4da3ff"); plot("pass", "#2ee6a8");
+}
+setInterval(statsTick, 1000);
+
+function connect(){
+  $("conn").className = "dot wait"; $("connlabel").textContent = "connecting…";
+  let ws;
+  try{ ws = new WebSocket(WS_URL); }
+  catch(e){ fail(e); return; }
+  ws.onopen = () => { backoff = 1000; $("conn").className = "dot on"; $("connlabel").textContent = "live — jetstream2.us-west"; };
+  ws.onmessage = e => {
+    let msg; try{ msg = JSON.parse(e.data); }catch(_){ return; }
+    const post = extractPost(msg);
+    if(!post){ win.other++; return; }                  // identity/account/delete — counted, not shown
+    win.posts++;
+    const pass = classify(post, re, $("ma").checked);
+    pass ? win.pass++ : win.drop++;
+    if(paused) return;
+    buffer.unshift(post); if(buffer.length > BUFFER_MAX) buffer.pop();
+    queue.push(post); if(queue.length > QUEUE_MAX) queue.shift(), skipped++;
+  };
+  ws.onclose = () => fail("closed");
+  ws.onerror = () => fail("error");
+  function fail(why){
+    $("conn").className = "dot off"; $("connlabel").textContent = "disconnected (" + why + ") — retrying";
+    setTimeout(connect, backoff); backoff = Math.min(backoff * 2, 10000);
+  }
+}
+connect();
+
+/* pause + focus shortcuts */
+const pauseBtn = $("pausebtn");
+function togglePause(){ paused = !paused; pauseBtn.classList.toggle("on", paused);
+  pauseBtn.innerHTML = paused ? "▶ resume <small>(space)</small>" : "⏸ pause <small>(space)</small>"; }
+pauseBtn.addEventListener("click", togglePause);
+document.addEventListener("keydown", e => {
+  if(e.code === "Space" && document.activeElement !== $("regex")){ e.preventDefault(); togglePause(); }
+  if(e.key === "/" && document.activeElement !== $("regex")){ e.preventDefault(); $("regex").focus(); }
+});
+$("regex").focus();
+</script>
+</body>
+</html>
