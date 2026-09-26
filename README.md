@@ -2,18 +2,17 @@ Laya Sky Feed
 
 ## Demo
 
-![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream.mp4)
+![Laya stream playground — live firehose, regex split, meaning verdicts and the reading tray](demo-stream-teaser.mp4)
 
-*(GitHub renders the video inline above; direct links: [demo-stream.mp4](demo-stream.mp4) · [demo-stream.webm](demo-stream.webm))*
+*15s teaser (160KB). Full recording: [demo-stream.mp4](demo-stream.mp4) · [demo-stream.webm](demo-stream.webm)*
 
 Recorded live: the raw Jetstream stream pours in, typing a regex splits it
 green/red on the fly, the meaning tab scores a 5/s sample with Laya on the
 default 6-way topic question (~200 ms/post on CPU), and verdicts for the
 collected option (technology) drip into the reading tray — collect threshold
 pushed to 95% first, then relaxed to 80% live when the confident drip slows.
-There is also a lighter `demo-stream.webm` spare. The capture choreography
-(CDP screencast of headless chromium) stays scratch; only the outputs are
-committed, like llm-arena-pareto's demo capture.
+The capture choreography (CDP screencast of headless chromium) stays scratch;
+only the outputs are committed, like llm-arena-pareto's demo capture.
 
 ## Run
 
